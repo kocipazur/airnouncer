@@ -6,7 +6,7 @@ var http = require("http");
 var port = 1924;
 var host = '127.0.0.1';
 
-var resType = { 'Content-Type': 'text/plain; charset=utf-8'};
+var resType = { 'Content-Type': 'application/json; charset=utf-8'};
 var apiPath = '/airnouncer/api/';
 
 var arrivals = [];
@@ -33,9 +33,8 @@ server = http.createServer(function (req, res) {
             var response = {};
             for (var q = 0; q < arrivals.length; q++) {
               response[q.toString()] = arrivals[q];
-              // response = response + JSON.stringify(arrivals[q]) + '\n';
             };
-            res.end(JSON.stringify(response));
+            res.end(response);
             response = {};
             arrivals = [];
             q = 0;
@@ -56,7 +55,6 @@ server = http.createServer(function (req, res) {
             var response = {};
             for (var q = 0; q < departures.length; q++) {
               response[q.toString()] = departures[q];
-              // response = response + JSON.stringify(arrivals[q]) + '\n';
             };
             res.end(JSON.stringify(response));
             response = {};
