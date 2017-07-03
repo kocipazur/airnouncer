@@ -58,4 +58,4 @@ typings/
 .env
 
 .sender.sh
-.telegram_bot_token
+*telegram_bot_token
