@@ -1,1 +1,1 @@
-node --use-strict telegram_bot_controller.js
+nodejs --use-strict telegram_bot_controller.js
