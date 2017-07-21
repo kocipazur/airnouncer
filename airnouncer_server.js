@@ -34,7 +34,7 @@ server = http.createServer(function (req, res) {
             for (var q = 0; q < arrivals.length; q++) {
               response[q.toString()] = arrivals[q];
             };
-            res.end(response);
+            res.end(JSON.stringify(response));
             response = {};
             arrivals = [];
             q = 0;

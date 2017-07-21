@@ -1,66 +1,98 @@
 const fs = require('fs');
 const Slimbot = require('slimbot');
-var MongoClient = require('mongodb').MongoClient;
-var assert = require('assert');
-var token = fs.readFileSync('telegram_bot_token').toString().trim();
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+const request = require('request');
+
+const mongoUrl = 'mongodb://localhost:27017/airnouncer';
+const airnouncerApiUrl = 'http://127.0.0.1:1924/airnouncer/api/';
+const apiArrivalsUrl = airnouncerApiUrl + 'getArrivals';
+const apiDeparturesUrl = airnouncerApiUrl + 'getDepartures';
+
+
+const token = fs.readFileSync('telegram_bot_token').toString().trim();
 const slimbot = new Slimbot(token);
 
-var helpMessage = `/start - rozpocznij subskrypcję \n
+const helpMessage = `Airnouncer - przyloty i odloty z poznańskiej Ławicy \n
+/start - rozpocznij subskrypcję \n
 /stop - zatrzymaj subskrypcję \n
-/help - wyświetl pomoc`;
+/help - wyświetl pomoc \n
+/shelp - komendy testowe`;
+
+const serviceHelpMessage = `Komendy testowe - diagnostyczne \n
+/getarrivalsjson - przyloty w formacie JSON \n
+/getdeparturesjson - odloty w formacie JSON`;
 
 slimbot.on('message', message => {
+  var thisChatId = message.chat.id;
   switch(message.text){
     case '/help':
-      slimbot.sendMessage(message.chat.id, helpMessage)
+      slimbot.sendMessage(thisChatId, helpMessage)
+      break;
+    case '/shelp':
+      slimbot.sendMessage(thisChatId, serviceHelpMessage)
       break;
     case '/start':
-      MongoClient.connect('mongodb://localhost:27017/airnouncer', function(err, db) {
+      MongoClient.connect(mongoUrl, (err, db) => {
         if (err) throw err
-        var myobj = { chatid: message.chat.id };
+        var myobj = { chatid: thisChatId };
         var users = db.collection('users');
-        users.findOne(myobj, function (err, res) {
+        users.findOne(myobj, (err, res) => {
           if (err) throw err;
           console.log("Checking if user exists for insertion...");
-          if (res === null) users.insertOne(myobj, function(err, res) {
+          if (res === null) users.insertOne(myobj, (err, res) => {
             if (err) throw err;
             console.log("User does not exist.");
             console.log("User inserted.");
-            slimbot.sendMessage(message.chat.id, `Subskrypcja została aktywowana!`);
+            slimbot.sendMessage(thisChatId, `Subskrypcja została aktywowana!`);
           });
           else {
-            slimbot.sendMessage(message.chat.id, `Subskrypcja jest już aktywna.`);
+            slimbot.sendMessage(thisChatId, `Subskrypcja jest już aktywna.`);
           }
           db.close();
           });
         });
       break;
+      case '/getarrivalsjson':
+        request(apiArrivalsUrl, (error, response, body) => {
+          if (!error && response.statusCode == 200) {
+            slimbot.sendMessage(thisChatId, JSON.stringify(JSON.parse(body), null, 2));
+          }
+        });
+        break;
+      case '/getdeparturesjson':
+        request(apiDeparturesUrl, (error, response, body) => {
+          if (!error && response.statusCode == 200) {
+            slimbot.sendMessage(thisChatId, JSON.stringify(JSON.parse(body), null, 2));
+          }
+        });
+        break;
       case '/stop':
-        MongoClient.connect('mongodb://localhost:27017/airnouncer', function(err, db) {
+        MongoClient.connect(mongoUrl, (err, db) => {
           if (err) throw err
-          var myobj = { chatid: message.chat.id };
+          var myobj = { chatid: thisChatId };
           var users = db.collection('users');
-          users.findOne(myobj, function (err, res) {
+          users.findOne(myobj, (err, res) => {
             if (err) throw err;
             console.log("Checking if user exists for deletion...");
-            if (res != null) users.remove(myobj, function(err, res) {
+            if (res != null) users.remove(myobj, (err, res) => {
               if (err) throw err;
               console.log("User exists.")
               console.log("User deleted.");
-              slimbot.sendMessage(message.chat.id, `Subskrypcja została dezaktywowana!`);
+              slimbot.sendMessage(thisChatId, `Subskrypcja została dezaktywowana!`);
             });
               else {
-                slimbot.sendMessage(message.chat.id, `Subskrypcja nie została aktywowana.`);
+                slimbot.sendMessage(thisChatId, `Subskrypcja nie została aktywowana.`);
               }
             db.close();
             });
           });
         break;
     default:
-      slimbot.sendMessage(message.chat.id, `Nieznana komenda. Użyj /help,
+      slimbot.sendMessage(thisChatId, `Nieznana komenda. Użyj /help,
          aby uzyskać pomoc i listę dostępnych poleceń.`);
   }
-  console.log(message.chat.id + ': ' + message.text + '\n');
+  console.log(thisChatId + ' - ' + message.text + '\n');
 });
 
 // Call API
