@@ -9,7 +9,6 @@ const airnouncerApiUrl = 'http://127.0.0.1:1924/airnouncer/api/';
 const apiArrivalsUrl = airnouncerApiUrl + 'getArrivals';
 const apiDeparturesUrl = airnouncerApiUrl + 'getDepartures';
 
-
 const token = fs.readFileSync('telegram_bot_token').toString().trim();
 const slimbot = new Slimbot(token);
 
@@ -22,6 +21,32 @@ const helpMessage = `Airnouncer - przyloty i odloty z poznańskiej Ławicy \n
 const serviceHelpMessage = `Komendy testowe - diagnostyczne \n
 /getarrivalsjson - przyloty w formacie JSON \n
 /getdeparturesjson - odloty w formacie JSON`;
+
+setInterval(function (){
+  request(apiArrivalsUrl, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    MongoClient.connect(mongoUrl, (err, db) => {
+      let arrivals = db.collection('arrivals');
+      arrivals.insertOne(JSON.parse(body), (err, res) => {
+        if (err) throw err;
+        console.log("Arrivals inserted.");
+      });
+    });
+  };
+  });
+  request(apiDeparturesUrl, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    MongoClient.connect(mongoUrl, (err, db) => {
+      let departures = db.collection('departures');
+      departures.insertOne(JSON.parse(body), (err, res) => {
+        if (err) throw err;
+        console.log("Departures inserted.");
+      });
+    });
+  };
+  });
+  console.log("Cyk!");
+},6000);
 
 slimbot.on('message', message => {
   var thisChatId = message.chat.id;
@@ -77,7 +102,6 @@ slimbot.on('message', message => {
             console.log("Checking if user exists for deletion...");
             if (res != null) users.remove(myobj, (err, res) => {
               if (err) throw err;
-              console.log("User exists.")
               console.log("User deleted.");
               slimbot.sendMessage(thisChatId, `Subskrypcja została dezaktywowana!`);
             });
