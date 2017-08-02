@@ -23,16 +23,16 @@ server = http.createServer(function (req, res) {
             //w petli omijamy pierwszy i ostatni element, bo tam siedzi jakis syf
             for (var index = 1; index < arrivalsArr.length -1; index++){
               arrivals.push({
-                hour: arrivalsArr[index].children[1].children[0].data,
-                from: arrivalsArr[index].children[3].children[0].data,
-                nr: arrivalsArr[index].children[5].children[0].data,
-                message: arrivalsArr[index].children[7].children[0].data
+                hour: arrivalsArr[index].children[1].children[0].data.trim(),
+                from: arrivalsArr[index].children[3].children[0].data.trim(),
+                nr: arrivalsArr[index].children[5].children[0].data.trim(),
+                message: arrivalsArr[index].children[7].children[0].data.trim()
               });
             };
             index = 0;
             var response = {};
             for (var q = 0; q < arrivals.length; q++) {
-              response[q.toString()] = arrivals[q];
+              response["_" + q.toString()] = arrivals[q];
             };
             res.end(JSON.stringify(response));
             response = {};
@@ -45,16 +45,16 @@ server = http.createServer(function (req, res) {
             //w petli omijamy pierwszy i ostatni element, bo tam siedzi jakis syf
             for (var index = 1; index < departuresArr.length -1; index++){
               departures.push({
-                hour: departuresArr[index].children[1].children[0].data,
-                from: departuresArr[index].children[3].children[0].data,
-                nr: departuresArr[index].children[5].children[0].data,
-                message: departuresArr[index].children[7].children[0].data
+                hour: departuresArr[index].children[1].children[0].data.trim(),
+                from: departuresArr[index].children[3].children[0].data.trim(),
+                nr: departuresArr[index].children[5].children[0].data.trim(),
+                message: departuresArr[index].children[7].children[0].data.trim()
               });
             };
             index = 0;
             var response = {};
             for (var q = 0; q < departures.length; q++) {
-              response[q.toString()] = departures[q];
+              response["_" + q.toString()] = departures[q];
             };
             res.end(JSON.stringify(response));
             response = {};

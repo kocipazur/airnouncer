@@ -22,31 +22,38 @@ const serviceHelpMessage = `Komendy testowe - diagnostyczne \n
 /getarrivalsjson - przyloty w formacie JSON \n
 /getdeparturesjson - odloty w formacie JSON`;
 
+const desiredFlightStatus = 'Ląduje';
+
+var lastSentFlight;
+
 setInterval(function (){
-  request(apiArrivalsUrl, function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    MongoClient.connect(mongoUrl, (err, db) => {
-      let arrivals = db.collection('arrivals');
-      arrivals.insertOne(JSON.parse(body), (err, res) => {
-        if (err) throw err;
-        console.log("Arrivals inserted.");
+  MongoClient.connect(mongoUrl, (err, db) => {
+    let subscribedUsersList = db.collection('users').find({}, (err, res) => {
+      request(apiArrivalsUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          let resultJson = JSON.parse(body);
+          let motherKeys = [];
+          let messageToSend = '';
+          for (var k in resultJson) {motherKeys.push(k)};
+          for (var i = 0; i <= motherKeys.length - 1; i++){
+            if(resultJson[motherKeys[i]].message === desiredFlightStatus && resultJson[motherKeys[i]].nr != lastSentFlight){
+              lastSentFlight = resultJson[motherKeys[i]].nr;
+              messageToSend = `Lot  ${resultJson[motherKeys[i]].nr} \n
+z ${resultJson[motherKeys[i]].from} \n
+podchodzi do lądowania!`
+            };
+          };
+          if (messageToSend != ''){
+            res.forEach((element) => {
+              slimbot.sendMessage(element.chatid, messageToSend);
+            });
+          };
+        };
       });
     });
-  };
-  });
-  request(apiDeparturesUrl, function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    MongoClient.connect(mongoUrl, (err, db) => {
-      let departures = db.collection('departures');
-      departures.insertOne(JSON.parse(body), (err, res) => {
-        if (err) throw err;
-        console.log("Departures inserted.");
-      });
-    });
-  };
   });
   console.log("Cyk!");
-},6000);
+},120000);
 
 slimbot.on('message', message => {
   var thisChatId = message.chat.id;
