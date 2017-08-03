@@ -12,15 +12,15 @@ const apiDeparturesUrl = airnouncerApiUrl + 'getDepartures';
 const token = fs.readFileSync('telegram_bot_token').toString().trim();
 const slimbot = new Slimbot(token);
 
-const helpMessage = `Airnouncer - przyloty i odloty z poznańskiej Ławicy \n
-/start - rozpocznij subskrypcję \n
-/stop - zatrzymaj subskrypcję \n
-/help - wyświetl pomoc \n
-/shelp - komendy testowe`;
+const helpMessage = 'Airnouncer - przyloty i odloty z poznańskiej Ławicy \n' +
+'/start - rozpocznij subskrypcję \n' +
+'/stop - zatrzymaj subskrypcję \n' +
+'/help - wyświetl pomoc \n' +
+'/shelp - komendy testowe';
 
-const serviceHelpMessage = `Komendy testowe - diagnostyczne \n
-/getarrivalsjson - przyloty w formacie JSON \n
-/getdeparturesjson - odloty w formacie JSON`;
+const serviceHelpMessage = 'Komendy testowe - diagnostyczne \n' +
+'/getarrivalsjson - przyloty w formacie JSON \n' +
+'/getdeparturesjson - odloty w formacie JSON';
 
 const desiredFlightStatus = 'Ląduje';
 
@@ -38,9 +38,9 @@ setInterval(function (){
           for (var i = 0; i <= motherKeys.length - 1; i++){
             if(resultJson[motherKeys[i]].message === desiredFlightStatus && resultJson[motherKeys[i]].nr != lastSentFlight){
               lastSentFlight = resultJson[motherKeys[i]].nr;
-              messageToSend = `Lot  ${resultJson[motherKeys[i]].nr} \n
-z ${resultJson[motherKeys[i]].from} \n
-podchodzi do lądowania!`
+              messageToSend = 'Lot  ${resultJson[motherKeys[i]].nr} \n' +
+'z ${resultJson[motherKeys[i]].from} \n' +
+'podchodzi do lądowania!'
             };
           };
           if (messageToSend != ''){
@@ -52,7 +52,6 @@ podchodzi do lądowania!`
       });
     });
   });
-  console.log("Cyk!");
 },120000);
 
 slimbot.on('message', message => {
@@ -76,10 +75,10 @@ slimbot.on('message', message => {
             if (err) throw err;
             console.log("User does not exist.");
             console.log("User inserted.");
-            slimbot.sendMessage(thisChatId, `Subskrypcja została aktywowana!`);
+            slimbot.sendMessage(thisChatId, 'Subskrypcja została aktywowana!');
           });
           else {
-            slimbot.sendMessage(thisChatId, `Subskrypcja jest już aktywna.`);
+            slimbot.sendMessage(thisChatId, 'Subskrypcja jest już aktywna.');
           }
           db.close();
           });
@@ -110,18 +109,18 @@ slimbot.on('message', message => {
             if (res != null) users.remove(myobj, (err, res) => {
               if (err) throw err;
               console.log("User deleted.");
-              slimbot.sendMessage(thisChatId, `Subskrypcja została dezaktywowana!`);
+              slimbot.sendMessage(thisChatId, 'Subskrypcja została dezaktywowana!');
             });
               else {
-                slimbot.sendMessage(thisChatId, `Subskrypcja nie została aktywowana.`);
+                slimbot.sendMessage(thisChatId, 'Subskrypcja nie została aktywowana.');
               }
             db.close();
             });
           });
         break;
     default:
-      slimbot.sendMessage(thisChatId, `Nieznana komenda. Użyj /help,
-         aby uzyskać pomoc i listę dostępnych poleceń.`);
+      slimbot.sendMessage(thisChatId, 'Nieznana komenda. Użyj /help,'+
+         'aby uzyskać pomoc i listę dostępnych poleceń.');
   }
   console.log(thisChatId + ' - ' + message.text + '\n');
 });
