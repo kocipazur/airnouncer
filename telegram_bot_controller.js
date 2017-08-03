@@ -38,8 +38,8 @@ setInterval(function (){
           for (var i = 0; i <= motherKeys.length - 1; i++){
             if(resultJson[motherKeys[i]].message === desiredFlightStatus && resultJson[motherKeys[i]].nr != lastSentFlight){
               lastSentFlight = resultJson[motherKeys[i]].nr;
-              messageToSend = 'Lot  ${resultJson[motherKeys[i]].nr} \n' +
-'z ${resultJson[motherKeys[i]].from} \n' +
+              messageToSend = 'Lot ' + resultJson[motherKeys[i]].nr + '\n' +
+'z ' + resultJson[motherKeys[i]].from + '\n' +
 'podchodzi do lądowania!'
             };
           };
